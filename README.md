@@ -1,0 +1,1 @@
+# things-for-mac-mcp
