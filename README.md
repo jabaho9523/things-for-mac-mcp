@@ -4,7 +4,9 @@ A powerful MCP (Model Context Protocol) server for **Things 3** on macOS. Goes b
 
 ## What makes this different?
 
-| Capability | [hald/things-mcp](https://github.com/hald/things-mcp) | This MCP |
+Most existing Things 3 MCP servers rely solely on the URL scheme for writes, which limits them to basic create/update operations. This server goes further:
+
+| Capability | Typical URL-scheme-only MCPs | This MCP |
 |---|---|---|
 | **Write mechanism** | URL scheme only | AppleScript + URL scheme |
 | **Move items** | Not supported | Move between projects/lists |
@@ -16,8 +18,7 @@ A powerful MCP (Model Context Protocol) server for **Things 3** on macOS. Goes b
 | **Workflow tools** | Not supported | Weekly review, export (JSON/MD/CSV) |
 | **MCP Resources** | Not used | List views as resources |
 | **MCP Prompts** | Not used | Weekly review, daily planning, project breakdown |
-| **Language** | Python | TypeScript |
-| **SQLite access** | via things.py | Direct (no Python dependency) |
+| **SQLite access** | Via Python wrappers | Direct (no Python dependency) |
 
 ## Requirements
 
