@@ -134,6 +134,9 @@ export async function cancelTodoById(todoId: string): Promise<void> {
 }
 
 export async function deleteTodoById(todoId: string): Promise<void> {
+  // Things' `to dos` collection excludes items in the Logbook and Trash.
+  // To let users delete completed / canceled items, we also search the
+  // Logbook explicitly. (Items already in Trash aren't our concern.)
   const script = thingsScript(`
     set targetTodo to missing value
     repeat with t in to dos
@@ -142,6 +145,14 @@ export async function deleteTodoById(todoId: string): Promise<void> {
         exit repeat
       end if
     end repeat
+    if targetTodo is missing value then
+      repeat with t in to dos of list "Logbook"
+        if id of t is "${escapeAS(todoId)}" then
+          set targetTodo to t
+          exit repeat
+        end if
+      end repeat
+    end if
     if targetTodo is missing value then error "Todo not found"
     move targetTodo to list "Trash"
   `);
