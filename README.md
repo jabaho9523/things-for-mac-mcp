@@ -51,6 +51,33 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
+## Troubleshooting
+
+**"Things 3 database not found"**
+
+Things 3 must have been launched at least once so that macOS creates the SQLite file. The MCP auto-detects both database layouts:
+
+- **Cloud-synced** (default when Things Cloud is enabled):
+  `~/Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/ThingsData-XXXXX/Things Database.thingsdatabase/main.sqlite`
+- **Legacy** (no Cloud sync):
+  `~/Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/Things Database.thingsdatabase/main.sqlite`
+
+If neither is found, the error message lists the path that was checked.
+
+**Changes to the source code don't take effect**
+
+The MCP runs `dist/index.js`, not the TypeScript source. After editing anything in `src/`:
+
+```bash
+npm run build
+```
+
+Then **restart Claude Desktop / Claude Code** so the server reloads the new compiled code.
+
+**Node version**
+
+Requires Node.js 18 or newer.
+
 ## Tools (30 total)
 
 ### Read Tools (15)
