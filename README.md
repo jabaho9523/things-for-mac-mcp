@@ -59,18 +59,20 @@ Restart Claude after editing. The 30 tools, resources, and prompts are now avail
 
 #### Perplexity (Mac desktop app)
 
-Perplexity's Mac app supports MCP servers. In Perplexity → Settings → **Connectors / MCP Servers**, add the same entry:
+Perplexity's Mac app supports MCP servers. In Perplexity → Settings → **Connectors / MCP Servers**, add:
 
 ```json
 {
   "mcpServers": {
     "things": {
-      "command": "node",
+      "command": "/opt/homebrew/bin/node",
       "args": ["/path/to/things-for-mac-mcp/dist/index.js"]
     }
   }
 }
 ```
+
+> **Use the absolute path to `node`**, not the bare word `"node"`. Perplexity's Mac app doesn't inherit your shell `PATH` and bundles its own Node runtime, so a bare `"node"` will fail with a `NODE_MODULE_VERSION` mismatch against `better-sqlite3`. Find your path with `which node` in Terminal — typically `/opt/homebrew/bin/node` (Apple Silicon Homebrew), `/usr/local/bin/node` (Intel Homebrew), or inside `~/.nvm/versions/node/…/bin/node` (nvm).
 
 Restart Perplexity. macOS will prompt once for Automation permission so the server can control Things 3 — approve it. Note that this only works on the **Mac desktop app** (not web or iOS), since the server talks to the local Things 3 install via AppleScript.
 
@@ -103,22 +105,9 @@ Requires Node.js 18 or newer.
 
 **`NODE_MODULE_VERSION` / `better-sqlite3` error at startup**
 
-The server uses `better-sqlite3`, a native module compiled against a specific Node ABI. If you installed with one Node version but your MCP host launches a different one, the binding crashes on first DB read with an error like `The module was compiled against a different Node.js version`.
+`better-sqlite3` is a native module compiled against a specific Node ABI. If your MCP host launches a different Node version than the one that installed it, the binding crashes on first DB read with `The module was compiled against a different Node.js version`.
 
-Fix it by rebuilding against your current Node:
-
-```bash
-cd things-for-mac-mcp
-rm -rf node_modules package-lock.json
-npm install
-npm run build
-```
-
-Then fully quit (⌘Q) and relaunch your MCP client.
-
-**The MCP "works in Claude Desktop but not Perplexity" (or vice versa)**
-
-GUI-launched macOS apps don't inherit your shell `PATH`, so a bare `"command": "node"` can resolve to a different `node` binary than the one you used to install. If a rebuild doesn't fix it, point at an absolute path in your MCP config:
+**First fix to try — use an absolute `node` path in your MCP config.** GUI-launched Mac apps don't inherit your shell `PATH`, and Perplexity in particular bundles its own (often older) Node runtime. Point your config at the same Node you installed with:
 
 ```json
 {
@@ -131,7 +120,18 @@ GUI-launched macOS apps don't inherit your shell `PATH`, so a bare `"command": "
 }
 ```
 
-Find your node path with `which node` in Terminal. Typical locations: `/opt/homebrew/bin/node` (Apple Silicon Homebrew), `/usr/local/bin/node` (Intel Homebrew), `~/.nvm/versions/node/…/bin/node` (nvm).
+Find the path with `which node` in Terminal. Typical locations: `/opt/homebrew/bin/node` (Apple Silicon Homebrew), `/usr/local/bin/node` (Intel Homebrew), `~/.nvm/versions/node/…/bin/node` (nvm). Fully quit (⌘Q) and relaunch your MCP client.
+
+**If that doesn't work — rebuild the native module.** This helps when you genuinely have a Node mismatch between install time and run time (e.g. upgraded Node after installing):
+
+```bash
+cd things-for-mac-mcp
+rm -rf node_modules package-lock.json
+npm install
+npm run build
+```
+
+Then quit and relaunch your client.
 
 **`npm warn deprecated prebuild-install@7.1.3`**
 
