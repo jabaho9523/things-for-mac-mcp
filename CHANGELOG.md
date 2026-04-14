@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **`get_today` / `get_upcoming` / `get_anytime` / `get_someday` queries.** Previous version relied on an invented `startBucket` column; rewritten against Things 3's real schema (`start` + `startDate`) to match `things.py` reference behavior.
 - **`add_todo` now returns the created todo's ID** when using the AppleScript creation path (no `when` / `heading` / `checklist_items`). Chained tool calls can now reference the new item directly.
 - **`get_anytime` timeout on large libraries.** Added a default `LIMIT 100` (configurable via the tool's optional `limit` parameter). Same treatment applied to `get_logbook` and `get_trash`.
+- **`delete_items` on completed/canceled todos.** AppleScript's default `to dos` collection excludes items in the Logbook, so trashing a completed item failed with "Todo not found". `delete_items` now falls back to searching the Logbook before giving up.
 
 ### Changed
 - Renamed "Claude Desktop Configuration" to a generic "Connect to an MCP client" section covering both Claude (Desktop / Code) and Perplexity.
