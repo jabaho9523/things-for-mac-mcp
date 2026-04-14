@@ -188,6 +188,12 @@ src/
     └── formatting.ts         # Output formatting
 ```
 
+## Support
+
+If this MCP saved you time, you can buy me a coffee:
+
+<a href="https://www.buymeacoffee.com/jabaho" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
 ## More from the author
 
 - **[HyperCap](https://www.nexiuslab.com/)** — Turns Caps Lock into a hyperkey on macOS. 27 shortcuts, snippets, markdown-to-rich-text, and a research notebook on one key.
