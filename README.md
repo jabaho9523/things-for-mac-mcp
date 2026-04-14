@@ -101,6 +101,20 @@ Then **restart your MCP client** (Claude Desktop / Claude Code / Perplexity) so 
 
 Requires Node.js 18 or newer.
 
+## Staying up to date
+
+- **Watch on GitHub** — click **Watch → Custom → Releases** on the repo page to get emailed when a new version ships.
+- **Startup notice** — when a newer release exists, the server prints a one-line notice to stderr on startup. The check runs at most once every 24 hours (cached at `~/.config/things-mcp/update-check.json`) and fails silently when offline.
+- **Upgrade:**
+  ```bash
+  cd things-for-mac-mcp
+  git pull
+  npm install
+  npm run build
+  ```
+  Then restart your MCP client so it reloads the compiled server.
+- **Changelog** — see [`CHANGELOG.md`](./CHANGELOG.md).
+
 ## Tools (30 total)
 
 ### Read Tools (15)
@@ -158,6 +172,8 @@ The server exposes Things lists as MCP resources:
 - `things://inbox`, `things://today`, `things://upcoming`, `things://anytime`, `things://someday`
 - `things://projects`, `things://areas`, `things://tags`
 - `things://project/{projectId}` — todos within a specific project
+
+> Resource visibility depends on the MCP client. Tools work in every client; resources are surfaced only by clients that implement the MCP `resources/list` protocol. Claude Desktop currently does not expose MCP resources in chat; some other clients do.
 
 ## MCP Prompts
 

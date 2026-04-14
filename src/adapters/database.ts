@@ -194,8 +194,9 @@ export function getUpcoming(): TodoRow[] {
 
 // Anytime = Anytime-bucket tasks with no startDate (unscheduled).
 // Excludes Today items (which have a startDate) and Someday-project children.
-export function getAnytime(): TodoRow[] {
+export function getAnytime(limit: number = 100): TodoRow[] {
   const db = getDb();
+  const safeLimit = Math.max(1, Math.floor(Number(limit)) || 100);
   return db
     .prepare(
       `${BASE_TODO_SELECT}
@@ -206,7 +207,8 @@ export function getAnytime(): TodoRow[] {
        AND t.trashed = ${TRASHED.NOT_TRASHED}
        AND (t.project IS NULL OR p.start != ${START.SOMEDAY})
      ${BASE_GROUP_BY}
-     ORDER BY t.todayIndex`
+     ORDER BY t.todayIndex
+     LIMIT ${safeLimit}`
     )
     .all() as TodoRow[];
 }
@@ -230,9 +232,10 @@ export function getSomeday(): TodoRow[] {
     .all() as TodoRow[];
 }
 
-export function getLogbook(daysBack: number = 7): TodoRow[] {
+export function getLogbook(daysBack: number = 7, limit: number = 100): TodoRow[] {
   const db = getDb();
   const cutoff = Math.floor(Date.now() / 1000) - daysBack * 86400;
+  const safeLimit = Math.max(1, Math.floor(Number(limit)) || 100);
   return db
     .prepare(
       `${BASE_TODO_SELECT}
@@ -241,18 +244,21 @@ export function getLogbook(daysBack: number = 7): TodoRow[] {
        AND t.trashed = ${TRASHED.NOT_TRASHED}
        AND t.stopDate >= ${cutoff}
      ${BASE_GROUP_BY}
-     ORDER BY t.stopDate DESC`
+     ORDER BY t.stopDate DESC
+     LIMIT ${safeLimit}`
     )
     .all() as TodoRow[];
 }
 
-export function getTrash(): TodoRow[] {
+export function getTrash(limit: number = 100): TodoRow[] {
   const db = getDb();
+  const safeLimit = Math.max(1, Math.floor(Number(limit)) || 100);
   return db
     .prepare(
       `${BASE_TODO_SELECT}
      WHERE t.trashed = ${TRASHED.TRASHED}
-     ${BASE_GROUP_BY}`
+     ${BASE_GROUP_BY}
+     LIMIT ${safeLimit}`
     )
     .all() as TodoRow[];
 }

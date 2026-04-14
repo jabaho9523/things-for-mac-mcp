@@ -51,13 +51,14 @@ export function registerWorkflowTools(server: McpServer): void {
           todos = db.getUpcoming();
           break;
         case "anytime":
-          todos = db.getAnytime();
+          // Export means "give me everything" — override the default limit.
+          todos = db.getAnytime(Number.MAX_SAFE_INTEGER);
           break;
         case "someday":
           todos = db.getSomeday();
           break;
         case "logbook":
-          todos = db.getLogbook(days_back ?? 30);
+          todos = db.getLogbook(days_back ?? 30, Number.MAX_SAFE_INTEGER);
           break;
         case "all_open":
           todos = db.getTodos();
