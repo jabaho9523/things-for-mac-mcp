@@ -66,16 +66,18 @@ export const TRASHED = {
   TRASHED: 1,
 } as const;
 
+// Things 3 `start` column semantics (per things.py reference implementation):
+//   0 = Inbox
+//   1 = Anytime bucket — includes both unscheduled (Anytime list) and
+//       scheduled-for-today (Today list). The distinction is whether
+//       startDate is set.
+//   2 = Someday bucket — includes both undated (Someday list) and
+//       future-dated (Upcoming list). The distinction is whether
+//       startDate is set.
 export const START = {
-  NOT_STARTED: 0, // Inbox
-  STARTED: 1, // Anytime / Today
+  INBOX: 0,
+  ANYTIME: 1,
   SOMEDAY: 2,
-} as const;
-
-export const START_BUCKET = {
-  ANYTIME: 0,
-  TODAY: 1,
-  EVENING: 2,
 } as const;
 
 // ── Core query helpers ──
@@ -144,7 +146,7 @@ export function getInbox(): TodoRow[] {
     .prepare(
       `${BASE_TODO_SELECT}
      WHERE t.type = ${TASK_TYPE.TODO}
-       AND t.start = ${START.NOT_STARTED}
+       AND t.start = ${START.INBOX}
        AND t.status = ${STATUS.OPEN}
        AND t.trashed = ${TRASHED.NOT_TRASHED}
      ${BASE_GROUP_BY}
@@ -153,14 +155,16 @@ export function getInbox(): TodoRow[] {
     .all() as TodoRow[];
 }
 
+// Today = Anytime-bucket tasks that have been scheduled (startDate set).
+// Excludes tasks whose parent project is in Someday.
 export function getToday(): TodoRow[] {
   const db = getDb();
   return db
     .prepare(
       `${BASE_TODO_SELECT}
      WHERE t.type = ${TASK_TYPE.TODO}
-       AND t.start = ${START.STARTED}
-       AND t.startBucket IN (${START_BUCKET.TODAY}, ${START_BUCKET.EVENING})
+       AND t.start = ${START.ANYTIME}
+       AND t.startDate IS NOT NULL
        AND t.status = ${STATUS.OPEN}
        AND t.trashed = ${TRASHED.NOT_TRASHED}
        AND (t.project IS NULL OR p.start != ${START.SOMEDAY})
@@ -170,32 +174,33 @@ export function getToday(): TodoRow[] {
     .all() as TodoRow[];
 }
 
+// Upcoming = future-scheduled tasks (still in Someday bucket until their
+// start date arrives, at which point Things moves them to Anytime).
 export function getUpcoming(): TodoRow[] {
   const db = getDb();
   return db
     .prepare(
       `${BASE_TODO_SELECT}
      WHERE t.type = ${TASK_TYPE.TODO}
-       AND t.start = ${START.STARTED}
+       AND t.start = ${START.SOMEDAY}
        AND t.startDate IS NOT NULL
-       AND t.startBucket IS NULL
        AND t.status = ${STATUS.OPEN}
        AND t.trashed = ${TRASHED.NOT_TRASHED}
-       AND (t.project IS NULL OR p.start != ${START.SOMEDAY})
      ${BASE_GROUP_BY}
      ORDER BY t.startDate`
     )
     .all() as TodoRow[];
 }
 
+// Anytime = Anytime-bucket tasks with no startDate (unscheduled).
+// Excludes Today items (which have a startDate) and Someday-project children.
 export function getAnytime(): TodoRow[] {
   const db = getDb();
   return db
     .prepare(
       `${BASE_TODO_SELECT}
      WHERE t.type = ${TASK_TYPE.TODO}
-       AND t.start = ${START.STARTED}
-       AND t.startBucket = ${START_BUCKET.ANYTIME}
+       AND t.start = ${START.ANYTIME}
        AND t.startDate IS NULL
        AND t.status = ${STATUS.OPEN}
        AND t.trashed = ${TRASHED.NOT_TRASHED}
@@ -206,14 +211,18 @@ export function getAnytime(): TodoRow[] {
     .all() as TodoRow[];
 }
 
+// Someday = Someday-bucket tasks with no startDate, plus any tasks whose
+// parent project is in Someday.
 export function getSomeday(): TodoRow[] {
   const db = getDb();
   return db
     .prepare(
       `${BASE_TODO_SELECT}
      WHERE t.type = ${TASK_TYPE.TODO}
-       AND (t.start = ${START.SOMEDAY}
-            OR (t.project IS NOT NULL AND p.start = ${START.SOMEDAY}))
+       AND (
+         (t.start = ${START.SOMEDAY} AND t.startDate IS NULL)
+         OR (t.project IS NOT NULL AND p.start = ${START.SOMEDAY})
+       )
        AND t.status = ${STATUS.OPEN}
        AND t.trashed = ${TRASHED.NOT_TRASHED}
      ${BASE_GROUP_BY}`
@@ -496,7 +505,7 @@ export function getStatistics(): StatsResult {
   const inboxCount = (
     db
       .prepare(
-        `SELECT COUNT(*) as c FROM TMTask WHERE type = ${TASK_TYPE.TODO} AND start = ${START.NOT_STARTED} AND status = ${STATUS.OPEN} AND trashed = ${TRASHED.NOT_TRASHED}`
+        `SELECT COUNT(*) as c FROM TMTask WHERE type = ${TASK_TYPE.TODO} AND start = ${START.INBOX} AND status = ${STATUS.OPEN} AND trashed = ${TRASHED.NOT_TRASHED}`
       )
       .get() as { c: number }
   ).c;
