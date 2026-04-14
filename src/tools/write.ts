@@ -26,7 +26,36 @@ export function registerWriteTools(server: McpServer): void {
         .describe("Checklist items to add"),
     },
     async (params) => {
-      // Use URL scheme for full parameter support (when, checklist, heading)
+      // Hybrid strategy:
+      //   • If only "simple" properties are set (no when/heading/checklist_items),
+      //     use AppleScript — it returns the new todo's UUID so chained tool
+      //     calls can reference it.
+      //   • Otherwise fall back to the URL scheme, which is fire-and-forget
+      //     but supports Things' magic-word scheduling, headings, and
+      //     checklist items.
+      const needsUrlScheme =
+        params.when !== undefined ||
+        params.heading !== undefined ||
+        (params.checklist_items && params.checklist_items.length > 0);
+
+      if (!needsUrlScheme) {
+        const id = await as.createTodo({
+          name: params.title,
+          notes: params.notes,
+          projectName: params.list,
+          tagNames: params.tags,
+          dueDate: params.deadline,
+        });
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Created todo "${params.title}" — ID: ${id}`,
+            },
+          ],
+        };
+      }
+
       await url.addTodoViaUrl({
         title: params.title,
         notes: params.notes,
@@ -41,7 +70,10 @@ export function registerWriteTools(server: McpServer): void {
         content: [
           {
             type: "text",
-            text: `Created todo: "${params.title}"${params.list ? ` in ${params.list}` : ""}`,
+            text:
+              `Created todo: "${params.title}"${params.list ? ` in ${params.list}` : ""}. ` +
+              `URL-scheme creation doesn't return an ID — use search_todos to retrieve it ` +
+              `(the SQLite cache is flushed a few seconds after creation).`,
           },
         ],
       };

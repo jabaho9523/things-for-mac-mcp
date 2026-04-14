@@ -25,9 +25,16 @@ export function registerReadTools(server: McpServer): void {
   server.tool(
     "get_anytime",
     "Get todos in the Anytime list (excludes Someday projects)",
-    {},
-    async () => ({
-      content: [{ type: "text", text: formatTodoList(db.getAnytime()) }],
+    {
+      limit: z
+        .number()
+        .optional()
+        .describe("Maximum number of results (default: 100)"),
+    },
+    async ({ limit }) => ({
+      content: [
+        { type: "text", text: formatTodoList(db.getAnytime(limit ?? 100)) },
+      ],
     })
   );
 
@@ -43,17 +50,41 @@ export function registerReadTools(server: McpServer): void {
   server.tool(
     "get_logbook",
     "Get completed todos from the logbook",
-    { days_back: z.number().optional().describe("Number of days back to look (default: 7)") },
-    async ({ days_back }) => ({
+    {
+      days_back: z
+        .number()
+        .optional()
+        .describe("Number of days back to look (default: 7)"),
+      limit: z
+        .number()
+        .optional()
+        .describe("Maximum number of results (default: 100)"),
+    },
+    async ({ days_back, limit }) => ({
       content: [
-        { type: "text", text: formatTodoList(db.getLogbook(days_back ?? 7)) },
+        {
+          type: "text",
+          text: formatTodoList(db.getLogbook(days_back ?? 7, limit ?? 100)),
+        },
       ],
     })
   );
 
-  server.tool("get_trash", "Get trashed items", {}, async () => ({
-    content: [{ type: "text", text: formatTodoList(db.getTrash()) }],
-  }));
+  server.tool(
+    "get_trash",
+    "Get trashed items",
+    {
+      limit: z
+        .number()
+        .optional()
+        .describe("Maximum number of results (default: 100)"),
+    },
+    async ({ limit }) => ({
+      content: [
+        { type: "text", text: formatTodoList(db.getTrash(limit ?? 100)) },
+      ],
+    })
+  );
 
   server.tool(
     "get_todos",

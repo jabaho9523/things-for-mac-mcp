@@ -39,7 +39,8 @@ export function registerResources(server: McpServer): void {
       name: "Anytime",
       uri: "things://anytime",
       description: "Things 3 Anytime list",
-      fetch: () => formatTodoList(db.getAnytime()),
+      // Resources represent the full list; bypass the default tool limit.
+      fetch: () => formatTodoList(db.getAnytime(Number.MAX_SAFE_INTEGER)),
     },
     {
       name: "Someday",
