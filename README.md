@@ -36,9 +36,13 @@ npm install
 npm run build
 ```
 
-### Claude Desktop Configuration
+### Connect to an MCP client
 
-Add to your `claude_desktop_config.json`:
+MCP is client-agnostic — the same server binary plugs into any MCP host. Two configurations are covered below.
+
+#### Claude (Desktop / Code)
+
+Add to your `claude_desktop_config.json` (Claude Desktop → Settings → Developer → Edit Config):
 
 ```json
 {
@@ -50,6 +54,25 @@ Add to your `claude_desktop_config.json`:
   }
 }
 ```
+
+Restart Claude after editing. The 30 tools, resources, and prompts are now available in any conversation.
+
+#### Perplexity (Mac desktop app)
+
+Perplexity's Mac app supports MCP servers. In Perplexity → Settings → **Connectors / MCP Servers**, add the same entry:
+
+```json
+{
+  "mcpServers": {
+    "things": {
+      "command": "node",
+      "args": ["/path/to/things-for-mac-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+Restart Perplexity. macOS will prompt once for Automation permission so the server can control Things 3 — approve it. Note that this only works on the **Mac desktop app** (not web or iOS), since the server talks to the local Things 3 install via AppleScript.
 
 ## Troubleshooting
 
@@ -72,7 +95,7 @@ The MCP runs `dist/index.js`, not the TypeScript source. After editing anything 
 npm run build
 ```
 
-Then **restart Claude Desktop / Claude Code** so the server reloads the new compiled code.
+Then **restart your MCP client** (Claude Desktop / Claude Code / Perplexity) so the server reloads the new compiled code.
 
 **Node version**
 
@@ -164,6 +187,13 @@ src/
 └── utils/
     └── formatting.ts         # Output formatting
 ```
+
+## More from the author
+
+- **[HyperCap](https://www.nexiuslab.com/)** — Turns Caps Lock into a hyperkey on macOS. 27 shortcuts, snippets, markdown-to-rich-text, and a research notebook on one key.
+- **[obsidian-paste-plus](https://github.com/jabaho9523/obsidian-paste-plus)** — Smart paste for Obsidian: URLs, images, HTML, YouTube, and Twitter in one plugin.
+- **[obsidian-link-plus](https://github.com/jabaho9523/obsidian-link-plus)** — Find every unlinked mention in your vault and convert them to wikilinks — one click or batch.
+- **[obsidian-vault-plus](https://github.com/jabaho9523/obsidian-vault-plus)** — Vault health dashboard: orphans, broken links, empty notes, duplicates, unused tags, unreferenced attachments — with one-click fixes.
 
 ## License
 
