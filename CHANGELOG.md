@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.2] — 2026-04-14
+
+### Changed
+- **Perplexity setup example** now uses an absolute `node` path (`/opt/homebrew/bin/node`) instead of the bare `"node"` string. Prevents the `NODE_MODULE_VERSION` mismatch that every Perplexity user hit on first launch, because Perplexity's Mac app doesn't inherit shell `PATH` and bundles its own older Node runtime.
+- **Troubleshooting re-ordered:** the absolute-`node`-path fix is now the primary recommendation for `NODE_MODULE_VERSION` errors; the native-module rebuild is listed as the fallback for genuine install-vs-runtime Node mismatches.
+
 ## [1.1.1] — 2026-04-14
 
 ### Added
