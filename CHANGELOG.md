@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] — 2026-04-14
+
+### Added
+- Troubleshooting entry for `NODE_MODULE_VERSION` / `better-sqlite3` ABI mismatch with a copy-paste rebuild recipe.
+- Troubleshooting entry for GUI-app `PATH` issues ("works in Claude Desktop but not Perplexity" etc.) — recommends using an absolute `node` path in the MCP config.
+- Troubleshooting note about the harmless `prebuild-install` deprecation warning.
+
 ## [1.1.0] — 2026-04-14
 
 ### Added

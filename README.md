@@ -101,6 +101,42 @@ Then **restart your MCP client** (Claude Desktop / Claude Code / Perplexity) so 
 
 Requires Node.js 18 or newer.
 
+**`NODE_MODULE_VERSION` / `better-sqlite3` error at startup**
+
+The server uses `better-sqlite3`, a native module compiled against a specific Node ABI. If you installed with one Node version but your MCP host launches a different one, the binding crashes on first DB read with an error like `The module was compiled against a different Node.js version`.
+
+Fix it by rebuilding against your current Node:
+
+```bash
+cd things-for-mac-mcp
+rm -rf node_modules package-lock.json
+npm install
+npm run build
+```
+
+Then fully quit (⌘Q) and relaunch your MCP client.
+
+**The MCP "works in Claude Desktop but not Perplexity" (or vice versa)**
+
+GUI-launched macOS apps don't inherit your shell `PATH`, so a bare `"command": "node"` can resolve to a different `node` binary than the one you used to install. If a rebuild doesn't fix it, point at an absolute path in your MCP config:
+
+```json
+{
+  "mcpServers": {
+    "things": {
+      "command": "/opt/homebrew/bin/node",
+      "args": ["/Users/you/path/to/things-for-mac-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+Find your node path with `which node` in Terminal. Typical locations: `/opt/homebrew/bin/node` (Apple Silicon Homebrew), `/usr/local/bin/node` (Intel Homebrew), `~/.nvm/versions/node/…/bin/node` (nvm).
+
+**`npm warn deprecated prebuild-install@7.1.3`**
+
+Harmless. `prebuild-install` is a transitive dependency of `better-sqlite3` and still works — it just won't get updates. The binary download and install succeed normally. This warning will disappear once `better-sqlite3` swaps to a maintained replacement.
+
 ## Staying up to date
 
 - **Watch on GitHub** — click **Watch → Custom → Releases** on the repo page to get emailed when a new version ships.
