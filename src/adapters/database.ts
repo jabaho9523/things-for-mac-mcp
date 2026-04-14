@@ -1,12 +1,33 @@
 import Database from "better-sqlite3";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 
-const THINGS_DB_PATH = join(
+const GROUP_CONTAINER = join(
   homedir(),
-  "Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/Things Database.thingsdatabase/main.sqlite"
+  "Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac"
 );
+const DB_SUFFIX = "Things Database.thingsdatabase/main.sqlite";
+
+function resolveThingsDbPath(): string {
+  // Cloud-synced layout: ThingsData-XXXXX/Things Database.thingsdatabase/main.sqlite
+  try {
+    const cloudDir = readdirSync(GROUP_CONTAINER).find((n) =>
+      n.startsWith("ThingsData-")
+    );
+    if (cloudDir) {
+      const cloudPath = join(GROUP_CONTAINER, cloudDir, DB_SUFFIX);
+      if (existsSync(cloudPath)) return cloudPath;
+    }
+  } catch {
+    // Group container doesn't exist yet — fall through to legacy path for the error message
+  }
+
+  // Legacy / local-only layout
+  return join(GROUP_CONTAINER, DB_SUFFIX);
+}
+
+const THINGS_DB_PATH = resolveThingsDbPath();
 
 let _db: Database.Database | null = null;
 
@@ -14,7 +35,11 @@ export function getDb(): Database.Database {
   if (_db) return _db;
   if (!existsSync(THINGS_DB_PATH)) {
     throw new Error(
-      `Things 3 database not found at ${THINGS_DB_PATH}. Is Things 3 installed?`
+      `Things 3 database not found. Checked:\n` +
+        `  - ${THINGS_DB_PATH}\n` +
+        `Make sure Things 3 is installed and has been launched at least once. ` +
+        `If you use Things Cloud, the DB lives under a ThingsData-XXXXX subfolder of ` +
+        `${GROUP_CONTAINER}.`
     );
   }
   _db = new Database(THINGS_DB_PATH, { readonly: true });
