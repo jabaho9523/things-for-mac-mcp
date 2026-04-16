@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.3] — 2026-04-16
+
+### Fixed
+- **`update_todo` now reads `THINGS_AUTH_TOKEN`.** Things' URL scheme requires an auth token for `update` calls, but the server had scaffolding and never plumbed it through — so `update_todo` failed even when the user pasted the token somewhere. Now reads `process.env.THINGS_AUTH_TOKEN` and throws a clear error pointing to the README if it's missing.
+
+### Added
+- README "Things authorization token" subsection explaining where to get the token (Things → Settings → General → Enable Things URLs → Manage) and how to pass it via the MCP client's `env` block. Both Claude and Perplexity config examples updated.
+- Troubleshooting entry for the `update_todo requires an auth token` error.
+
 ## [1.1.2] — 2026-04-16
 
 ### Fixed

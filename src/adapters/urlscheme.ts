@@ -106,7 +106,12 @@ export async function addTodoViaUrl(params: {
 }
 
 /**
- * Update an existing todo via URL scheme (requires auth-token for some properties).
+ * Update an existing todo via URL scheme.
+ *
+ * Things requires an auth-token for any `update` URL call. The token comes
+ * from Things → Settings → General → Enable Things URLs → Manage → Copy
+ * Authorization Token. It's read from the `THINGS_AUTH_TOKEN` env var by
+ * default so users can set it once in their MCP client config.
  */
 export async function updateTodoViaUrl(
   id: string,
@@ -127,8 +132,16 @@ export async function updateTodoViaUrl(
   },
   authToken?: string
 ): Promise<void> {
-  const urlParams: Record<string, string> = { id };
-  if (authToken) urlParams["auth-token"] = authToken;
+  const token = authToken ?? process.env["THINGS_AUTH_TOKEN"];
+  if (!token) {
+    throw new Error(
+      "update_todo requires an auth token. Copy it from Things → Settings → " +
+        "General → Enable Things URLs → Manage → Copy Authorization Token, " +
+        'then add it to your MCP client config under "env": ' +
+        '{ "THINGS_AUTH_TOKEN": "<your-token>" }. See README for details.'
+    );
+  }
+  const urlParams: Record<string, string> = { id, "auth-token": token };
   if (params.title) urlParams["title"] = params.title;
   if (params.notes) urlParams["notes"] = params.notes;
   if (params.when) urlParams["when"] = params.when;

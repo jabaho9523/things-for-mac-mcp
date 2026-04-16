@@ -40,6 +40,10 @@ npm run build
 
 MCP is client-agnostic — the same server binary plugs into any MCP host. Two configurations are covered below.
 
+#### Things authorization token (required for `update_todo`)
+
+Things' URL scheme requires an auth token to modify existing items. Copy yours from **Things → Settings → General → Enable Things URLs → Manage → Copy Authorization Token**, then pass it to the server via the `THINGS_AUTH_TOKEN` env var in the MCP config (shown in both examples below). Without it, creation / read / complete / move / delete still work, but `update_todo` will throw a clear error.
+
 #### Claude (Desktop / Code)
 
 Add to your `claude_desktop_config.json` (Claude Desktop → Settings → Developer → Edit Config):
@@ -49,7 +53,10 @@ Add to your `claude_desktop_config.json` (Claude Desktop → Settings → Develo
   "mcpServers": {
     "things": {
       "command": "node",
-      "args": ["/path/to/things-for-mac-mcp/dist/index.js"]
+      "args": ["/path/to/things-for-mac-mcp/dist/index.js"],
+      "env": {
+        "THINGS_AUTH_TOKEN": "paste-your-token-here"
+      }
     }
   }
 }
@@ -66,7 +73,10 @@ Perplexity's Mac app supports MCP servers. In Perplexity → Settings → **Conn
   "mcpServers": {
     "things": {
       "command": "/opt/homebrew/bin/node",
-      "args": ["/path/to/things-for-mac-mcp/dist/index.js"]
+      "args": ["/path/to/things-for-mac-mcp/dist/index.js"],
+      "env": {
+        "THINGS_AUTH_TOKEN": "paste-your-token-here"
+      }
     }
   }
 }
@@ -102,6 +112,18 @@ Then **restart your MCP client** (Claude Desktop / Claude Code / Perplexity) so 
 **Node version**
 
 Requires Node.js 18 or newer.
+
+**`update_todo requires an auth token`**
+
+Things requires an authorization token for any URL-scheme `update` call (used by `update_todo`). Copy it from **Things → Settings → General → Enable Things URLs → Manage → Copy Authorization Token**, then add it to your MCP client config under `"env"`:
+
+```json
+"env": {
+  "THINGS_AUTH_TOKEN": "paste-your-token-here"
+}
+```
+
+Fully quit (⌘Q) and relaunch your client. All other tools (read, create, complete, move, delete, batch ops) work without the token — only `update_todo` needs it.
 
 **`NODE_MODULE_VERSION` / `better-sqlite3` error at startup**
 
