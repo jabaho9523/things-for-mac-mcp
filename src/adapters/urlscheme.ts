@@ -15,7 +15,7 @@ export async function openThingsUrl(
   const query = Object.entries(params)
     .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
     .join("&");
-  const url = `things:////${command}?${query}`;
+  const url = `things:///${command}?${query}`;
   await execFileAsync("osascript", [
     "-e",
     `open location "${url.replace(/"/g, '\\"')}"`,
@@ -29,6 +29,7 @@ export async function openThingsUrl(
 export async function addProjectWithJson(json: {
   title: string;
   notes?: string;
+  area?: string;
   "area-id"?: string;
   when?: string;
   deadline?: string;
@@ -43,8 +44,28 @@ export async function addProjectWithJson(json: {
     "checklist-items"?: Array<{ title: string; completed?: boolean }>;
   }>;
 }): Promise<void> {
-  await openThingsUrl("add-json", {
-    data: JSON.stringify([json]),
+  // Things' JSON endpoint requires {"type":"project","attributes":{...}} wrapping.
+  const attrs: Record<string, unknown> = { title: json.title };
+  if (json.notes) attrs["notes"] = json.notes;
+  if (json.when) attrs["when"] = json.when;
+  if (json.deadline) attrs["deadline"] = json.deadline;
+  if (json.tags?.length) attrs["tags"] = json.tags;
+  if (json.area) attrs["area"] = json.area;
+  if (json["area-id"]) attrs["area-id"] = json["area-id"];
+  if (json.items?.length) {
+    attrs["items"] = json.items.map((item) => {
+      const itemAttrs: Record<string, unknown> = { title: item.title };
+      if (item.notes) itemAttrs["notes"] = item.notes;
+      if (item.when) itemAttrs["when"] = item.when;
+      if (item.deadline) itemAttrs["deadline"] = item.deadline;
+      if (item.tags?.length) itemAttrs["tags"] = item.tags;
+      if (item["checklist-items"]?.length)
+        itemAttrs["checklist-items"] = item["checklist-items"];
+      return { type: item.type, attributes: itemAttrs };
+    });
+  }
+  await openThingsUrl("json", {
+    data: JSON.stringify([{ type: "project", attributes: attrs }]),
     reveal: "true",
   });
 }

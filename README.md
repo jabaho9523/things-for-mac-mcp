@@ -55,7 +55,7 @@ Add to your `claude_desktop_config.json` (Claude Desktop → Settings → Develo
 }
 ```
 
-Restart Claude after editing. The 30 tools, resources, and prompts are now available in any conversation.
+Restart Claude after editing. The 34 tools, resources, and prompts are now available in any conversation.
 
 #### Perplexity (Mac desktop app)
 
@@ -151,7 +151,7 @@ Harmless. `prebuild-install` is a transitive dependency of `better-sqlite3` and 
   Then restart your MCP client so it reloads the compiled server.
 - **Changelog** — see [`CHANGELOG.md`](./CHANGELOG.md).
 
-## Tools (30 total)
+## Tools (34 total)
 
 ### Read Tools (15)
 | Tool | Description |
@@ -172,7 +172,7 @@ Harmless. `prebuild-install` is a transitive dependency of `better-sqlite3` and 
 | `search_advanced` | Multi-filter search (status, tag, area, project, date) |
 | `get_recent` | Recently created items |
 
-### Write Tools (12)
+### Write Tools (13)
 | Tool | Description | Mechanism |
 |------|-------------|-----------|
 | `add_todo` | Create todo with scheduling, tags, checklists | URL scheme |
@@ -186,7 +186,8 @@ Harmless. `prebuild-install` is a transitive dependency of `better-sqlite3` and 
 | `batch_tag` | Apply tags to multiple todos | **AppleScript** |
 | `create_area` | Create a new area | **AppleScript** |
 | `create_tag` | Create a new tag | **AppleScript** |
-| `show_item` / `search_in_things` | Navigate Things UI | URL scheme |
+| `show_item` | Show a specific item or list in Things UI | URL scheme |
+| `search_in_things` | Trigger a search in the Things UI | URL scheme |
 
 ### Analytics Tools (4)
 | Tool | Description |

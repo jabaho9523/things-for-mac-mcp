@@ -5,9 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [1.1.2] — 2026-04-14
+## [1.1.2] — 2026-04-16
+
+### Fixed
+- **`add_project` now works.** Two bugs prevented it from ever succeeding: (1) the Things URL scheme command was `add-json` — which Things doesn't support; the correct endpoint is `json`. (2) The JSON payload was a flat object; Things requires `{"type":"project","attributes":{…}}` wrapping for both the project and its items. Also fixed the `area` parameter being silently dropped.
+- **URL scheme used 4 slashes** (`things:////command`) instead of the correct 3 (`things:///command`). Things was lenient enough to accept it for most commands, but it was technically wrong.
 
 ### Changed
+- **Tool count corrected** — the README header and section heading said 30 / 12 write tools; actual counts are **34 tools total / 13 write tools** (`show_item` and `search_in_things` were counted as one but are two separate tools).
 - **Perplexity setup example** now uses an absolute `node` path (`/opt/homebrew/bin/node`) instead of the bare `"node"` string. Prevents the `NODE_MODULE_VERSION` mismatch that every Perplexity user hit on first launch, because Perplexity's Mac app doesn't inherit shell `PATH` and bundles its own older Node runtime.
 - **Troubleshooting re-ordered:** the absolute-`node`-path fix is now the primary recommendation for `NODE_MODULE_VERSION` errors; the native-module rebuild is listed as the fallback for genuine install-vs-runtime Node mismatches.
 

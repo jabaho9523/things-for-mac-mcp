@@ -111,6 +111,7 @@ export function registerWriteTools(server: McpServer): void {
       await url.addProjectWithJson({
         title: params.title,
         notes: params.notes,
+        area: params.area,
         when: params.when,
         deadline: params.deadline,
         tags: params.tags,
