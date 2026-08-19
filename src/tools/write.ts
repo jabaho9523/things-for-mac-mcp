@@ -18,7 +18,12 @@ export function registerWriteTools(server: McpServer): void {
         ),
       deadline: z.string().optional().describe("Deadline date (YYYY-MM-DD)"),
       tags: z.array(z.string()).optional().describe("Tag names to apply"),
-      list: z.string().optional().describe("Target list or project name"),
+      list: z
+        .string()
+        .optional()
+        .describe(
+          "Target project, area, or built-in list name (Inbox, Today, Anytime, Someday)"
+        ),
       heading: z.string().optional().describe("Heading within a project"),
       checklist_items: z
         .array(z.string())
@@ -42,7 +47,7 @@ export function registerWriteTools(server: McpServer): void {
         const id = await as.createTodo({
           name: params.title,
           notes: params.notes,
-          projectName: params.list,
+          listName: params.list,
           tagNames: params.tags,
           dueDate: params.deadline,
         });
@@ -193,7 +198,7 @@ export function registerWriteTools(server: McpServer): void {
         content: [
           {
             type: "text",
-            text: `Completed ${result.completed.length} todos.${result.notFound.length > 0 ? ` Not found: ${result.notFound.join(", ")}` : ""}`,
+            text: `Completed ${result.succeeded.length} todos.${result.notFound.length > 0 ? ` Not found: ${result.notFound.join(", ")}` : ""}`,
           },
         ],
       };
@@ -207,12 +212,19 @@ export function registerWriteTools(server: McpServer): void {
       todo_ids: z.array(z.string()).describe("Array of todo UUIDs to cancel"),
     },
     async ({ todo_ids }) => {
-      for (const id of todo_ids) {
-        await as.cancelTodoById(id);
+      if (todo_ids.length === 1) {
+        await as.cancelTodoById(todo_ids[0]!);
+        return {
+          content: [{ type: "text", text: `Canceled todo ${todo_ids[0]}` }],
+        };
       }
+      const result = await as.batchCancel(todo_ids);
       return {
         content: [
-          { type: "text", text: `Canceled ${todo_ids.length} todo(s).` },
+          {
+            type: "text",
+            text: `Canceled ${result.succeeded.length} todo(s).${result.notFound.length > 0 ? ` Not found: ${result.notFound.join(", ")}` : ""}`,
+          },
         ],
       };
     }
@@ -238,21 +250,25 @@ export function registerWriteTools(server: McpServer): void {
 
   server.tool(
     "move_todo",
-    "Move a todo to a different project or list (via AppleScript)",
+    "Move a todo to a different project, area, or built-in list (via AppleScript)",
     {
       todo_id: z.string().describe("Todo UUID to move"),
       target_project: z
         .string()
         .optional()
         .describe("Target project name (move into this project)"),
+      target_area: z
+        .string()
+        .optional()
+        .describe("Target area name (move directly under this area)"),
       target_list: z
         .string()
         .optional()
         .describe(
-          "Target list name: 'Inbox', 'Today', 'Anytime', 'Someday'"
+          "Target list name: 'Inbox', 'Today', 'Anytime', 'Someday'. Falls back to an area or project of the same name."
         ),
     },
-    async ({ todo_id, target_project, target_list }) => {
+    async ({ todo_id, target_project, target_area, target_list }) => {
       if (target_project) {
         await as.moveTodoToProject(todo_id, target_project);
         return {
@@ -264,11 +280,19 @@ export function registerWriteTools(server: McpServer): void {
           ],
         };
       }
+      if (target_area) {
+        await as.moveTodoToArea(todo_id, target_area);
+        return {
+          content: [
+            { type: "text", text: `Moved todo to area "${target_area}"` },
+          ],
+        };
+      }
       if (target_list) {
         await as.moveTodoToList(todo_id, target_list);
         return {
           content: [
-            { type: "text", text: `Moved todo to list "${target_list}"` },
+            { type: "text", text: `Moved todo to "${target_list}"` },
           ],
         };
       }
@@ -276,7 +300,8 @@ export function registerWriteTools(server: McpServer): void {
         content: [
           {
             type: "text",
-            text: "Please specify either target_project or target_list.",
+            text:
+              "Please specify one of target_project, target_area, or target_list.",
           },
         ],
         isError: true,
@@ -297,7 +322,7 @@ export function registerWriteTools(server: McpServer): void {
         content: [
           {
             type: "text",
-            text: `Moved ${result.moved.length} todos to "${project_name}".${result.notFound.length > 0 ? ` Not found: ${result.notFound.join(", ")}` : ""}`,
+            text: `Moved ${result.succeeded.length} todos to "${project_name}".${result.notFound.length > 0 ? ` Not found: ${result.notFound.join(", ")}` : ""}`,
           },
         ],
       };
@@ -317,7 +342,7 @@ export function registerWriteTools(server: McpServer): void {
         content: [
           {
             type: "text",
-            text: `Tagged ${result.tagged.length} todos.${result.notFound.length > 0 ? ` Not found: ${result.notFound.join(", ")}` : ""}`,
+            text: `Tagged ${result.succeeded.length} todos.${result.notFound.length > 0 ? ` Not found: ${result.notFound.join(", ")}` : ""}`,
           },
         ],
       };

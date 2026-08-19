@@ -197,13 +197,13 @@ Harmless. `prebuild-install` is a transitive dependency of `better-sqlite3` and 
 ### Write Tools (13)
 | Tool | Description | Mechanism |
 |------|-------------|-----------|
-| `add_todo` | Create todo with scheduling, tags, checklists | URL scheme |
+| `add_todo` | Create todo with scheduling, tags, checklists | AppleScript + URL scheme |
 | `add_project` | Create project with todos and headings | URL scheme (JSON) |
 | `update_todo` | Update todo properties | URL scheme |
 | `complete_items` | Complete one or more todos | **AppleScript** |
 | `cancel_items` | Cancel one or more todos | **AppleScript** |
 | `delete_items` | Trash one or more todos | **AppleScript** |
-| `move_todo` | Move todo to different project/list | **AppleScript** |
+| `move_todo` | Move todo to a project, area, or built-in list | **AppleScript** |
 | `batch_move` | Move multiple todos to a project | **AppleScript** |
 | `batch_tag` | Apply tags to multiple todos | **AppleScript** |
 | `create_area` | Create a new area | **AppleScript** |
