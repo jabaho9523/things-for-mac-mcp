@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-08-19
+
+### Fixed
+- **`move_todo` with `target_project` always failed with `Cannot move to-do (301)`.** Things' `move` command takes a *list* — which is why moving to Anytime or Someday always worked while every move into a project failed. A to-do's `project` and `area` are ordinary mutable properties, so both moves are now property assignments (`set project of …`, `set area of …`) rather than `move`.
+- **`add_todo` could not file an item into an existing project** (`AppleEvent handler failed. (-10000)`). The generated script used `make new to do with properties {…} of project "X"`, which isn't a valid `make` location specifier. Now uses `at end of`, with a create-then-assign fallback.
+- **`add_todo` rejected Area names** (`Can't get project "…" (-1728)`) even though `list` is documented as accepting any destination. The destination was hardcoded to `project`; it is now resolved as a project, then an area, then a built-in list.
+- **Batch tools reported live to-dos as "not found".** `repeat with targetId in idList` binds an AppleScript *reference* to the list item, not the string inside it, so the id comparison and the "not found" report both operated on a reference. Fixed with `contents of`.
+- **`Can't get item N of every to do. Invalid index. (-1719)`.** Every write helper located its target by scanning the entire `to dos` collection. The scan was O(n) over the whole library per call, and AppleScript re-resolves `item N of to dos` on each iteration — so any concurrent mutation (Cloud sync, reindexing) invalidated the indices mid-scan. All lookups now use Things' `to do id "…"` object specifier.
+- **Multi-line notes produced a syntax error.** `escapeAS` escaped quotes and backslashes but not control characters, so a newline in `notes` terminated the AppleScript string literal. Newlines, carriage returns, and tabs are now escaped.
+- **`deadline` was locale-dependent.** `date "2026-09-01"` parses against the user's locale and throws on most non-US systems. Date components are now assigned individually, and a malformed deadline raises a clear error instead of an AppleScript failure.
+
+### Added
+- **`move_todo` accepts `target_area`** to file a to-do directly under an area with no project. `target_list` also now falls back to an area or project of the same name.
+- **`cancel_items` runs as a single batch.** It previously spawned one `osascript` process per id and aborted the whole call on the first failure; it now reports per-id results like `complete_items`.
+
+### Changed
+- `add_todo`'s `list` parameter is documented as accepting a project, area, or built-in list name.
+- Batch helpers return a uniform `{ succeeded, notFound }` shape instead of per-operation field names.
+
 ## [1.1.3] — 2026-04-16
 
 ### Fixed
