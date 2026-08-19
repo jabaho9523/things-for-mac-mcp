@@ -1,7 +1,7 @@
 {
   "name": "things-for-mac-mcp",
   "version": "1.2.1",
-  "description": "A powerful MCP server for Things 3 on macOS \u2014 with AppleScript-powered writes, analytics, and workflow tools",
+  "description": "A powerful MCP server for Things 3 on macOS — with AppleScript-powered writes, analytics, and workflow tools",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
