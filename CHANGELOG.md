@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.1] — 2026-08-19
+
+### Fixed
+- **`npm install` failed to build on Node 24 and newer.** The pinned `better-sqlite3` ^11.8.2 has no prebuilt binary for those runtimes, and its source no longer compiles against current V8 headers — `no member named 'GetPrototype' in 'v8::Object'`, `no member named 'GetIsolate' in 'v8::Context'`, and `no member named 'This' in 'v8::PropertyCallbackInfo'`, all APIs V8 has since removed. Upstream added Node 26 support in 12.10.0; the dependency is now `^13.0.3`. The API this server uses (`new Database`, `pragma`, `prepare().all()/.get()`) is unchanged across the bump.
+
+### Added
+- `engines.node: >=22` in `package.json`, so npm warns about an unsupported runtime up front instead of failing partway through a native compile.
+
 ## [1.2.0] — 2026-08-19
 
 ### Fixed
